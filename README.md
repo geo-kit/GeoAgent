@@ -2,29 +2,11 @@
 
 The assistant built into [GeoView](https://github.com/geo-kit/GeoView), the reservoir
 model viewer. It answers questions about the model you have open and operates the app
-for you in plain language: finding a deck, opening it, running a simulation, filling in
-an optimization run.
+in plain language: finding a deck, opening it, running a simulation, filling in an
+optimization run.
 
 GeoAgent computes nothing itself. It drives GeoView, which does the work and shows the
-result in its own tabs. That keeps it small — seven dependencies, no Julia, no solver —
-and keeps what it can do to a list you can read in a minute.
-
-```
-You:       какая модель загружена?
-GeoAgent:  Egg_Model_ECL.DATA — сетка 60×60×7, 18553 активных ячейки,
-           12 скважин, фазы WATER/OIL. Расчёта ещё не было.
-
-You:       посчитай её
-GeoAgent:  Запустил расчёт. Результат появится во вкладке 3D view.
-
-You:       теперь оптимизируй
-GeoAgent:  Для оптимизации нужны параметры, которых я не могу выдумать:
-           цена нефти и газа ($/m3), стоимость закачки воды и газа
-           и стоимость добычи воды ($/m3), ставка дисконта (%/год),
-           горизонт прогноза (месяцы), число итераций (по умолчанию 25),
-           границы забойного давления для добывающих и нагнетательных
-           скважин (бар). Какие подставить?
-```
+result in its own tabs. That keeps it small: seven dependencies, no Julia, no solver.
 
 ## What it can do
 
@@ -33,15 +15,15 @@ GeoAgent:  Для оптимизации нужны параметры, кото
 | `find_reservoir_models` | Lists sub-directories and `.DATA` / `.hdf5` files in one directory. Never reads file contents. |
 | `load_model_in_geoview` | Opens a model in GeoView. |
 | `run_simulation_in_geoview` | Runs GeoView's JutulDarcy simulation of the model already open. Takes no arguments, so it cannot target a different deck than the one on screen. |
-| `prepare_optimization_in_geoview` | Fills in GeoView's BHP optimization form and opens the tab. **Does not start the run** — you press Optimize. |
+| `prepare_optimization_in_geoview` | Fills in GeoView's BHP optimization form and opens the tab. Does not start the run; you press Optimize. |
 
-Questions about the loaded model need no tool at all: GeoView puts a summary of what is
-on screen — path, grid, active cells, phases, wells, dates, whether results exist — at
-the top of every message.
+Questions about the loaded model need no tool at all. GeoView puts a summary of what is
+on screen (path, grid, active cells, phases, wells, dates, whether results exist) at the
+top of every message.
 
 The optimization tool requires all twelve economic and engineering inputs. That is
 deliberate: the agent cannot call it without them, so instead of inventing an oil price
-and producing a confident, meaningless NPV, it asks you.
+and producing a confident but meaningless NPV, it asks.
 
 ## What it deliberately cannot do
 
@@ -50,7 +32,7 @@ contents. No network calls beyond the model provider. The only thing it writes i
 request in GeoView's own artifact directory.
 
 Set `GEOAGENT_MODEL_ROOTS` to restrict which directories it may browse and open models
-from. Unset, it can open any readable model file — the same reach as the path field in
+from. Unset, it can open any readable model file, the same reach as the path field in
 GeoView's own interface.
 
 ## Install
@@ -71,7 +53,7 @@ Then copy `.env.example` to `.env` and fill in the API key for the provider you 
 
 ## Run
 
-Normally you do not start it yourself — GeoView does, and points its chat at it:
+Normally you do not start it yourself. GeoView does, and points its chat at it:
 
 ```bash
 python -m geoview.app --server --port 8080 --agent --agent-provider openai --agent-model gpt-5-mini

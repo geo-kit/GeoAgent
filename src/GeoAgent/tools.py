@@ -1,7 +1,7 @@
-"""The agent's tools.
+"""Tools available to the agent.
 
-Four tools, all of them either read-only on the filesystem or a request written into
-GeoView's artifact directory. Nothing here executes code, spawns a process, reads file
+All four are either read-only on the filesystem or write a request into GeoView's
+artifact directory. Nothing here executes code, spawns a process, reads file
 contents or writes outside that directory.
 """
 
@@ -32,9 +32,6 @@ def _outside_allowed_roots(path: Path) -> str:
     return f"'{path}' is outside the directories this agent may use ({listed})."
 
 
-# ── 1. Finding models ────────────────────────────────────────────────────────
-
-
 class FindReservoirModelsInput(BaseModel):
     directory: str = Field(
         description="Absolute path of the directory to inspect, e.g. 'D:/models'."
@@ -52,6 +49,7 @@ class FindReservoirModelsInput(BaseModel):
     args_schema=FindReservoirModelsInput,
 )
 def find_reservoir_models(directory: str) -> str:
+    "List reservoir models and sub-directories in one directory."
     path = Path(directory).expanduser()
     if not path.exists():
         return f"Directory not found: {path}"
@@ -79,11 +77,8 @@ def find_reservoir_models(directory: str) -> str:
     truncated = len(lines) > MAX_LISTED_ENTRIES
     listing = "\n".join(lines[:MAX_LISTED_ENTRIES])
     if truncated:
-        listing += f"\n… {len(lines) - MAX_LISTED_ENTRIES} more entries not shown."
+        listing += f"\n... {len(lines) - MAX_LISTED_ENTRIES} more entries not shown."
     return f"Contents of {path}:\n{listing}"
-
-
-# ── 2. Loading a model into GeoView ──────────────────────────────────────────
 
 
 class LoadModelInput(BaseModel):
@@ -102,6 +97,7 @@ class LoadModelInput(BaseModel):
     args_schema=LoadModelInput,
 )
 def load_model_in_geoview(data_file: str) -> str:
+    "Ask GeoView to open a reservoir model."
     path = Path(data_file).expanduser()
     if path.suffix.lower() not in MODEL_SUFFIXES:
         return (
@@ -117,25 +113,18 @@ def load_model_in_geoview(data_file: str) -> str:
         return denied
 
     try:
-        publish(
-            "load_model",
-            f"Opening {path.name} in GeoView.",
-            data_file=str(path),
-        )
+        publish("load_model", f"Opening {path.name} in GeoView.", data_file=str(path))
     except ArtifactError as err:
         return str(err)
     return (
-        f"Asked GeoView to open {path}. Loading a large model takes a few seconds; "
+        f"Asked GeoView to open {path}. Loading a large model takes a few seconds. "
         "GeoView reports the outcome in the chat itself, so do not call this tool again "
         "for the same file."
     )
 
 
-# ── 3. Running the simulation ────────────────────────────────────────────────
-
-
 class NoArguments(BaseModel):
-    "Tools that act on whatever GeoView currently has open take no arguments."
+    "Schema for tools that act on whatever GeoView currently has open."
 
 
 @tool(
@@ -149,6 +138,7 @@ class NoArguments(BaseModel):
     args_schema=NoArguments,
 )
 def run_simulation_in_geoview() -> str:
+    "Ask GeoView to simulate the loaded model."
     try:
         publish("run_simulation", "Starting a simulation of the loaded model.")
     except ArtifactError as err:
@@ -159,14 +149,11 @@ def run_simulation_in_geoview() -> str:
     )
 
 
-# ── 4. Preparing an optimization run ─────────────────────────────────────────
-
-
 class PrepareOptimizationInput(BaseModel):
-    """Every field is required on purpose.
+    """Inputs for GeoView's BHP optimization form.
 
-    These are economic and engineering inputs that only the user can supply — guessing
-    them would silently produce a meaningless NPV. Ask for whatever is missing.
+    Every field is required. These are economic and engineering values that only the
+    user can supply; guessing them produces a meaningless NPV. Ask for what is missing.
     """
 
     oil_price: float = Field(description="Oil price, $/m3.")
@@ -218,7 +205,7 @@ def _validate_optimization(params: dict) -> str:
         "Fill in GeoView's BHP optimization form for the loaded model and open the "
         "Optimization tab, so the user can review the values and press Optimize "
         "themselves. This tool does not start the optimization. Call it only once the "
-        "user has given every value — never invent prices, costs, horizons or pressure "
+        "user has given every value. Never invent prices, costs, horizons or pressure "
         "bounds; ask for the ones you are missing."
     ),
     args_schema=PrepareOptimizationInput,
@@ -237,6 +224,7 @@ def prepare_optimization_in_geoview(
     bhp_inj_min: float,
     bhp_inj_max: float,
 ) -> str:
+    "Fill GeoView's optimization form without starting the run."
     params = {
         "oil_price": oil_price,
         "gas_price": gas_price,
@@ -269,7 +257,7 @@ def prepare_optimization_in_geoview(
         return str(err)
     return (
         "GeoView's Optimization tab is now open with these values filled in. Tell the "
-        "user to check them and press Optimize when ready — the run is theirs to start."
+        "user to check them and press Optimize when ready; the run is theirs to start."
     )
 
 

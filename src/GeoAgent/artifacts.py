@@ -6,9 +6,9 @@ instead of an API. The agent writes:
     <result_dir>/results/<run_id>/result.json   # manifest for this action
     <result_dir>/results/latest.json            # {"run_id": <run_id>} pointer
 
-GeoView polls ``latest.json`` and, when it changes, reads the manifest and routes it
-by its ``type`` field. The pointer is written *last* so a watcher never reads a
-half-written run.
+GeoView polls latest.json and, when it changes, reads the manifest and routes it by
+its type field. The pointer is written last so a watcher never reads a half-written
+run.
 """
 
 from __future__ import annotations
@@ -30,10 +30,10 @@ def _new_run_id() -> str:
 
 
 def publish(kind: str, message: str, **payload) -> str:
-    """Write a manifest of type ``kind`` and publish it to GeoView.
+    """Write a manifest of the given type and publish it to GeoView.
 
-    Returns the run id. Raises ArtifactError when no result directory is
-    configured, so the tool can tell the user instead of writing into the void.
+    Returns the run id. Raises ArtifactError when no result directory is configured,
+    so the tool can say so instead of writing nowhere.
     """
     root = configuration.result_dir()
     if root is None:

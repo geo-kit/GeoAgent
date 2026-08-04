@@ -57,7 +57,7 @@ def published(result_dir):
     return json.loads(manifest.read_text(encoding="utf-8"))
 
 
-# ── artifact contract ────────────────────────────────────────────────────────
+# artifact contract
 
 
 def test_pointer_is_written_after_the_manifest(result_dir, deck):
@@ -87,7 +87,7 @@ def test_tools_explain_themselves_when_geoview_is_absent(monkeypatch, deck):
     assert "GEOVIEW_RESULT_DIR" in answer
 
 
-# ── load_model_in_geoview ────────────────────────────────────────────────────
+# load_model_in_geoview
 
 
 def test_load_rejects_a_non_model_file(result_dir, tmp_path):
@@ -113,7 +113,7 @@ def test_load_respects_the_allow_list(result_dir, deck, tmp_path, monkeypatch):
     assert not (result_dir / "results").exists()
 
 
-# ── find_reservoir_models ────────────────────────────────────────────────────
+# find_reservoir_models
 
 
 def test_find_lists_models_and_folders_only(deck, tmp_path):
@@ -131,7 +131,7 @@ def test_find_reports_a_missing_directory(tmp_path):
     assert "not found" in answer.lower()
 
 
-# ── run_simulation_in_geoview ────────────────────────────────────────────────
+# run_simulation_in_geoview
 
 
 def test_simulation_request_is_published(result_dir):
@@ -139,7 +139,7 @@ def test_simulation_request_is_published(result_dir):
     assert published(result_dir)["type"] == "run_simulation"
 
 
-# ── prepare_optimization_in_geoview ──────────────────────────────────────────
+# prepare_optimization_in_geoview
 
 
 def test_optimization_publishes_every_form_field(result_dir):

@@ -1,3 +1,3 @@
-"""GeoAgent — the assistant built into GeoView."""
+"""GeoAgent: the assistant built into GeoView."""
 
 __all__ = ["configuration", "prompts", "tools"]

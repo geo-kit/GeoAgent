@@ -1,8 +1,8 @@
-"""Configuration for the public GeoAgent.
+"""Configuration.
 
 Everything comes from environment variables; there is no config file and no model
-presets. GeoView sets these variables on the agent process when it launches it
-(see ``GeoView/geoview/app.py``), and ``.env`` covers standalone runs.
+presets. GeoView sets these variables on the agent process when it launches it,
+and .env covers standalone runs.
 """
 
 from __future__ import annotations
@@ -20,16 +20,15 @@ SUPPORTED_PROVIDERS = ("openai", "lmstudio", "ollama")
 
 
 def qualified_model() -> str:
-    "The configured ``provider:model`` string."
+    "The configured provider:model string."
     return os.environ.get("GEOAGENT_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
 
 
 def load_chat_model():
-    """Build the chat model from ``GEOAGENT_MODEL``.
+    """Build the chat model from GEOAGENT_MODEL.
 
-    LM Studio speaks the OpenAI protocol, so it reuses ``ChatOpenAI`` with its own
-    base URL. An unsupported provider fails here with a readable message rather
-    than a KeyError deeper in the stack.
+    LM Studio speaks the OpenAI protocol, so it reuses ChatOpenAI with its own base
+    URL. An unsupported provider fails here with a readable message.
     """
     spec = qualified_model()
     provider, _, model = spec.partition(":")
@@ -86,9 +85,8 @@ def result_dir() -> Path | None:
 def model_roots() -> list[Path]:
     """Directories the agent may browse and load models from.
 
-    Empty list means no restriction: the agent is driven by a local user through a
-    local UI, and loading a deck is exactly what they could type into GeoView's own
-    path field. Set ``GEOAGENT_MODEL_ROOTS`` to narrow that down.
+    An empty list means no restriction: loading a deck is exactly what the user could
+    type into GeoView's own path field. Set GEOAGENT_MODEL_ROOTS to narrow it down.
     """
     raw = os.environ.get("GEOAGENT_MODEL_ROOTS", "").strip()
     if not raw:
