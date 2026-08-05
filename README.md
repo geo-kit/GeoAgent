@@ -1,3 +1,7 @@
+### 🌐 Multi-Language Support
+
+**English** | [Русский](./translations/ru/README.md)
+
 # GeoAgent
 
 The assistant built into [GeoView](https://github.com/geo-kit/GeoView), the reservoir
