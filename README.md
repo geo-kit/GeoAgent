@@ -4,40 +4,38 @@
 
 # GeoAgent
 
-The assistant built into [GeoView](https://github.com/geo-kit/GeoView), the reservoir
-model viewer. It answers questions about the model you have open and operates the app
-in plain language: finding a deck, opening it, running a simulation, filling in an
-optimization run.
+GeoAgent is the chat panel inside [GeoView](https://github.com/geo-kit/GeoView). Ask it
+which model is open, point it at a deck somewhere on disk, or tell it to run the
+simulation and watch the 3D view fill in.
 
-GeoAgent computes nothing itself. It drives GeoView, which does the work and shows the
-result in its own tabs. That keeps it small: seven dependencies, no Julia, no solver.
+GeoView does the computing. The agent presses its buttons for you, which is why
+installing it pulls seven Python packages and no Julia.
 
 ## What it can do
 
 | Tool | What happens |
 |---|---|
-| `find_reservoir_models` | Lists sub-directories and `.DATA` / `.hdf5` files in one directory. Never reads file contents. |
+| `find_reservoir_models` | Lists sub-directories and `.DATA` / `.hdf5` files in one directory. Reads no file contents. |
 | `load_model_in_geoview` | Opens a model in GeoView. |
-| `run_simulation_in_geoview` | Runs GeoView's JutulDarcy simulation of the model already open. Takes no arguments, so it cannot target a different deck than the one on screen. |
-| `prepare_optimization_in_geoview` | Fills in GeoView's BHP optimization form and opens the tab. Does not start the run; you press Optimize. |
+| `run_simulation_in_geoview` | Runs GeoView's JutulDarcy simulation of the model already open. Takes no arguments, so it cannot reach for a deck other than the one on screen. |
+| `prepare_optimization_in_geoview` | Fills in GeoView's BHP optimization form and opens the tab. You press Optimize. |
 
-Questions about the loaded model need no tool at all. GeoView puts a summary of what is
-on screen (path, grid, active cells, phases, wells, dates, whether results exist) at the
-top of every message.
+Asking what is loaded costs no tool call. GeoView pastes the current state at the top of
+every message you send: file path, grid size, active cells, phases, well names, dates,
+and whether a simulation has run yet.
 
-The optimization tool requires all twelve economic and engineering inputs. That is
-deliberate: the agent cannot call it without them, so instead of inventing an oil price
-and producing a confident but meaningless NPV, it asks.
+The optimization tool takes twelve economic and engineering values and will not run with
+any of them missing. Guess an oil price and you get an NPV that reads as authoritative
+and means nothing, so the agent asks you for the numbers.
 
-## What it deliberately cannot do
+## Limits
 
-No shell commands. No code execution. No editing or deleting files. No reading file
-contents. No network calls beyond the model provider. The only thing it writes is a JSON
-request in GeoView's own artifact directory.
+The agent cannot open a shell, execute code, or change a file on your disk. It reads
+directory listings, not the contents of a deck. Everything it writes lands in one place,
+GeoView's artifact directory, as JSON.
 
-Set `GEOAGENT_MODEL_ROOTS` to restrict which directories it may browse and open models
-from. Unset, it can open any readable model file, the same reach as the path field in
-GeoView's own interface.
+Out of the box it can open any model file you could have typed into GeoView's own path
+field. Set `GEOAGENT_MODEL_ROOTS` to keep it inside directories you choose.
 
 ## Install
 
@@ -57,20 +55,20 @@ Then copy `.env.example` to `.env` and fill in the API key for the provider you 
 
 ## Run
 
-Normally you do not start it yourself. GeoView does, and points its chat at it:
+GeoView starts the agent for you and points its chat at it:
 
 ```bash
 python -m geoview.app --server --port 8080 --agent --agent-provider openai --agent-model gpt-5-mini
 ```
 
-Standalone, for development against LangGraph Studio:
+To work on the agent itself, run it against LangGraph Studio:
 
 ```bash
 langgraph dev --host 127.0.0.1 --port 2024 --no-browser
 ```
 
-Set `GEOVIEW_RESULT_DIR` to GeoView's `.agent_runtime` directory first, otherwise the
-tools have nowhere to deliver their requests and will say so.
+Point `GEOVIEW_RESULT_DIR` at GeoView's `.agent_runtime` directory first. Without it the
+tools have nowhere to deliver a request, and they will tell you so.
 
 ## Configuration
 
@@ -87,17 +85,18 @@ Everything is an environment variable; see `.env.example`.
 
 ## How it talks to GeoView
 
-The two run as separate processes, so they share a directory instead of an API. The
-agent writes a manifest and then publishes a pointer to it:
+GeoView and the agent are separate processes, so they pass work through a shared
+directory rather than an API. The agent writes a manifest, then publishes a pointer to
+it:
 
 ```
 <GEOVIEW_RESULT_DIR>/results/<run_id>/result.json   # what to do, and with what
 <GEOVIEW_RESULT_DIR>/results/latest.json            # {"run_id": ...}, written last
 ```
 
-GeoView polls the pointer once a second and dispatches on the manifest's `type`. The
-pointer is written last so a watcher never reads a half-written request. Adding a
-capability means a new `type` on both sides; the transport does not change.
+GeoView checks that pointer once a second and routes the manifest by its `type` field.
+Writing the pointer last keeps GeoView from picking up a half-finished request. To add a
+capability, add a `type` on both sides; the transport stays as it is.
 
 ## Tests
 
@@ -108,7 +107,8 @@ ruff check . && ruff format --check .
 
 ## GeoAgentPro
 
-GeoAgent operates the application. GeoAgentPro reasons about reservoir engineering: it
-writes, runs, lints and repairs JutulDarcy Julia code, retrieves from the JutulDarcy
-documentation, runs its own simulations and multi-step autonomous workflows, and works
-from a CLI or as an MCP server as well as inside GeoView. It is available separately.
+GeoAgent operates the application. GeoAgentPro does the engineering: it writes JutulDarcy
+code in Julia, runs it, reads the errors and fixes them, and searches the JutulDarcy
+documentation on the way. It runs simulations in its own process instead of asking
+GeoView for them, and you can drive it from a terminal or as an MCP server. Sold
+separately.
