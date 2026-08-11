@@ -1,0 +1,12 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "GeoAgent": {
+      "path": "./src/GeoAgent/graph.py:graph",
+      "description": "Assistant that operates GeoView: inspects the loaded reservoir model, loads models, starts simulations and prepares optimization runs."
+    }
+  },
+  "env": ".env"
+}
