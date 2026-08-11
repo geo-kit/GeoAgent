@@ -104,11 +104,3 @@ capability, add a `type` on both sides; the transport stays as it is.
 pytest
 ruff check . && ruff format --check .
 ```
-
-## GeoAgentPro
-
-GeoAgent operates the application. GeoAgentPro does the engineering: it writes JutulDarcy
-code in Julia, runs it, reads the errors and fixes them, and searches the JutulDarcy
-documentation on the way. It runs simulations in its own process instead of asking
-GeoView for them, and you can drive it from a terminal or as an MCP server. Sold
-separately.
