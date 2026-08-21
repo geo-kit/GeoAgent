@@ -23,7 +23,7 @@ GeoAgent — это встроенный в [GeoView](https://github.com/geo-kit
 ## Конфиденциальность
 
 Агент не может открыть командную оболочку, выполнить код или изменить файл на вашем диске. Он читает
-списки каталогов, а не содержимое колоды. Все, что он записывает, попадает в 
+списки каталогов, а не содержимое колоды. Все, что он записывает, попадает 
 в каталог артефактов GeoView, в формате JSON.
 
 ## Установка
@@ -70,7 +70,7 @@ langgraph dev --host 127.0.0.1 --port 2024 --no-browser
 
 | `GEOAGENT_MODEL` | `provider:model`. Провайдеры: `openai`, `lmstudio`, `ollama`. GeoView устанавливает это из своих собственных флагов. |
 
-| `OPENAI_API_KEY`, `OPENAI_BASE_URL` | OpenAI или любая совместимая с OpenAI конечная точка. |
+| `OPENAI_API_KEY`, `OPENAI_BASE_URL` | OpenAI или  совместимый с OpenAI протокол. |
 
 | `LMSTUDIO_BASE_URL`, `LMSTUDIO_API_KEY`, `LMSTUDIO_MODEL` | Локальный сервер LM Studio. |
 
