@@ -66,11 +66,11 @@ Writing the pointer last keeps GeoView from picking up a half-finished request.
 For this agent the `type` is always a request — `load_model`, `run_simulation`, or
 `optimization_setup`. It never writes results back, because it computes nothing itself.
 
-To add a capability, add a `type` on both sides; the transport stays as it is.
+To add a capability, add a `type` on both sides.
 
 ## Development
 
-Python 3.13 and [uv](https://docs.astral.sh/uv/). From this directory:
+Requires Python 3.13 and [uv](https://docs.astral.sh/uv/). From this directory:
 
 ```bash
 uv venv && uv pip install -e . --group dev
