@@ -21,10 +21,12 @@ The agent cannot open a shell, execute code, or change a file on your disk. It r
 directory listings, not the contents of a deck. Everything it writes lands in one place,
 GeoView's artifact directory, as JSON.
 
-## Installation
+## Getting started
 
-Requires Python 3.13, [uv](https://docs.astral.sh/uv/), and [GeoView](https://github.com/geo-kit/GeoView).
-Clone the GeoAgent repository next to the GeoView:
+GeoView launches and stops the agent for you, so the install steps live with it:
+**[Enabling the chat](https://github.com/geo-kit/GeoView#enabling-the-chat-geoagent)**.
+
+Clone it next to GeoView; that is where GeoView looks by default:
 
 ```
 your-workspace/
@@ -32,30 +34,7 @@ your-workspace/
 └── GeoAgent/
 ```
 
-Then install the dependencies:
-
-```bash
-uv venv && uv pip install -e . --group dev
-```
-
-Then copy `.env.example` to `.env` and fill in the API key for the provider you use.
-
-## Run
-
-Run GeoView wuth `--agent` flag (flags `--agent-provider` and `--agent-model` are optional):
-
-```bash
-python -m geoview.app --agent --agent-provider openai --agent-model gpt-5-mini
-```
-
-To run the agent itself, use LangGraph Studio:
-
-```bash
-langgraph dev --host 127.0.0.1 --port 2024 --no-browser
-```
-
-Point `GEOVIEW_RESULT_DIR` at GeoView's `.agent_runtime` directory first. Without it the
-tools have nowhere to deliver a request, and they will tell you so.
+Anywhere else works too, as long as `GEOVIEW_AGENT_DIR` points at it.
 
 ## Configuration
 
@@ -68,7 +47,7 @@ tools have nowhere to deliver a request, and they will tell you so.
 | `GEOVIEW_RESULT_DIR` | Where to deliver requests. Set by GeoView. |
 | `GEOAGENT_MODEL_ROOTS` | Optional allow-list of directories, `os.pathsep` separated. |
 
-See `.env.example` for an example of confirugation.
+See `.env.example` for an example of configuration.
 
 ## How it communicates with GeoView
 
@@ -81,9 +60,38 @@ it:
 <GEOVIEW_RESULT_DIR>/results/latest.json            # {"run_id": ...}, written last
 ```
 
-GeoView checks that pointer once a second and routes the manifest.
+GeoView checks that pointer once a second and routes the manifest by its `type` field.
+Writing the pointer last keeps GeoView from picking up a half-finished request.
+
+For this agent the `type` is always a request — `load_model`, `run_simulation`, or
+`optimization_setup`. It never writes results back, because it computes nothing itself.
+
+To add a capability, add a `type` on both sides.
+
+## Development
+
+Requires Python 3.13 and [uv](https://docs.astral.sh/uv/). From this directory:
+
+```bash
+uv venv && uv pip install -e . --group dev
+pytest
+ruff check . && ruff format --check .
+```
+
+To work on the agent itself, run it under LangGraph Studio instead of letting GeoView start it.
+This is the one case where `GEOVIEW_RESULT_DIR` is yours to set: GeoView normally sets it on the
+agent process, and nothing does here, so the publishing tools refuse to act without it:
+
+```bash
+export GEOVIEW_RESULT_DIR=/path/to/GeoView/.agent_runtime
+langgraph dev --host 127.0.0.1 --port 2024 --no-browser --no-reload --allow-blocking
+```
+
+`--allow-blocking` is not optional — the tools make synchronous calls and the dev server aborts
+runs without it. `graph.py` is loaded by path from `langgraph.json`, so it must use absolute
+imports (`from GeoAgent.configuration import ...`).
 
 ## Need more features?
 
-GeoAgent serves as a baseline AI agent for basic workflows. 
+GeoAgent serves as a baseline AI agent for basic workflows.
 For advanced capabilities — such as automated code generation and execution based on user prompts — please contact us to request access.
