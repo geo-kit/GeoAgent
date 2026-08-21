@@ -81,9 +81,7 @@ it:
 <GEOVIEW_RESULT_DIR>/results/latest.json            # {"run_id": ...}, written last
 ```
 
-GeoView checks that pointer once a second and routes the manifest by its `type` field.
-Writing the pointer last keeps GeoView from picking up a half-finished request. To add a
-capability, add a `type` on both sides; the transport stays as it is.
+GeoView checks that pointer once a second and routes the manifest.
 
 ## Need more features?
 
